@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -143,6 +143,10 @@ class WeixinPay(object):
         except urllib2.HTTPError, e:
             resp = e
         return self.to_dict(resp.read())
+
+    def reply(self, msg, ok=True):
+        code = "SUCCESS" if ok else "FAIL"
+        return self.to_xml(dict(return_code=code, return_msg=msg))
 
     def unified_order(self, **data):
         """
