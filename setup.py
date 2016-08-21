@@ -7,7 +7,7 @@ from distutils.core import setup
 setup(
         name='Flask-Weixin-Pay',
         py_modules=['flask_weixin_pay'],
-        version='0.2.0',
+        version='0.2.1',
         description='Weixin Pay from Flask',
         author='zakzou',
         author_email='zakzou@gmail.com',

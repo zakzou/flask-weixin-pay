@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -178,8 +178,8 @@ class WeixinPay(object):
         return row
 
     def jsapi(self, **kwargs):
-        prepay_id = self.unified_order(**kwargs)
-        package = "prepay_id={0}".format(prepay_id)
+        raw = self.unified_order(**kwargs)
+        package = "prepay_id={0}".format(raw["prepay_id"])
         timestamp = int(time.time())
         nonce_str = self.nonce_str
         raw = dict(appId=self.app_id, timeStamp=timestamp,
