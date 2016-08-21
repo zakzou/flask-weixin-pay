@@ -23,7 +23,7 @@ except ImportError:
     from xml.etree import ElementTree as etree
 
 
-__all__ = ("WeixinPay",)
+__all__ = ("WeixinPay", "WeixinError")
 __version__ = "0.1.0"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
@@ -101,10 +101,10 @@ class WeixinPay(object):
     to_utf8 = lambda self, x: x.encode("utf-8") if isinstance(x, unicode) else x
 
     def sign(self, raw):
-        raw = [(k, raw[k]) for k in sorted(raw.keys())]
+        raw = [(k, str(raw[k]) if isinstance(raw[k], int) else raw[k]) \
+               for k in sorted(raw.keys())]
         s = "&".join("=".join(kv) for kv in raw if kv[1])
         s += "&key={0}".format(self.mch_key)
-        print s
         return hashlib.md5(self.to_utf8(s)).hexdigest().upper()
 
     def verify(self, content):
@@ -126,11 +126,11 @@ class WeixinPay(object):
             raw[child.tag] = child.text
         return raw
 
-    def unified_order(self, body, out_trade_no, total_fee, user_ip=None,
-                      attach=None, device_info="WEB", openid="",
-                      trade_type="JSAPI", *args, **kwargs):
+    def unified_order(self, body, out_trade_no, total_fee, user_ip="",
+                      openid="", attach="", device_info="WEB", trade_type="JSAPI",
+                      *args, **kwargs):
         url = "https://api.mch.weixin.qq.com/pay/unifiedorder"
-        if user_ip is None and request is not None:
+        if not user_ip and request is not None:
             user_ip = request.remote_addr
         params = {
             "appid": self.app_id,
@@ -142,14 +142,13 @@ class WeixinPay(object):
             "notify_url": self.notify_url,
             "out_trade_no": out_trade_no,
             "spbill_create_ip": user_ip,
-            "total_fee": str(int(total_fee * 100)),
+            "total_fee": int(total_fee * 100),
             "trade_type": trade_type,
             "openid": openid,
         }
         params.update(kwargs)
         params["sign"] = self.sign(params)
         data = self.to_xml(params)
-        print data
         req = urllib2.Request(url, data=data)
         try:
             resp = self.opener.open(req, timeout=20)
@@ -157,14 +156,16 @@ class WeixinPay(object):
             resp = e
         row = self.to_dict(resp.read())
         if row["return_code"] == "FAIL":
-            print row["return_msg"]
             raise WeixinError(row["return_msg"])
+        err_msg = row.get("err_code_des")
+        if err_msg:
+            raise WeixinError(err_msg)
         return row["prepay_id"]
 
     def jsapi(self, **kwargs):
         prepay_id = self.unified_order(**kwargs)
         package = "prepay_id={0}".format(prepay_id)
-        timestamp = str(int(time.time()))
+        timestamp = int(time.time())
         nonce_str = self.nonce_str
         raw = dict(appId=self.app_id, timeStamp=timestamp,
                    nonceStr=nonce_str, package=package, signType="MD5")
