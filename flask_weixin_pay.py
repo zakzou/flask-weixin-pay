@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -105,15 +105,23 @@ class WeixinPay(object):
     to_utf8 = lambda self, x: x.encode("utf-8") if isinstance(x, unicode) else x
 
     def sign(self, raw):
+        """
+        生成签名
+        参考微信签名生成算法
+        https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_3
+        """
         raw = [(k, str(raw[k]) if isinstance(raw[k], (int, float)) else raw[k]) \
                for k in sorted(raw.keys())]
         s = "&".join("=".join(kv) for kv in raw if kv[1])
         s += "&key={0}".format(self.mch_key)
         return hashlib.md5(self.to_utf8(s)).hexdigest().upper()
 
-    def verify(self, content):
-        raw = self.to_dict(content)
-        if raw["sign"] == self.sign(raw):
+    def check(self, raw):
+        """
+        验证返回数据是否能通过验证
+        """
+        sign = raw.pop("sign")
+        if sign == self.sign(raw):
             return True
         return False
 
@@ -178,6 +186,10 @@ class WeixinPay(object):
         return raw
 
     def jsapi(self, **kwargs):
+        """
+        生成给JavaScript调用的数据
+        详细规则参考 https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=7_7&index=6
+        """
         raw = self.unified_order(**kwargs)
         package = "prepay_id={0}".format(raw["prepay_id"])
         timestamp = int(time.time())
