@@ -30,7 +30,6 @@
         "WEIXIN_MCH_ID": "100000010",
         "WEIXIN_MCH_KEY": "128bad2e99a79312e25b2c162c9bab34",
         "WEIXIN_NOTIFY_URL": "http://www.example.com/pay/weixin/notify",
-
     }
     wxpay = WeixinPay(config)
 
@@ -38,10 +37,10 @@
 
     out_trade_no = wx_pay.nonce_str
     try:
-    raw = wx_pay.unified_order(openid="orU79wrXdrgNRNEZmoFD97rxGkb0", trade_type="JSAPI", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
-    print raw["prepay_id"]
+        raw = wx_pay.unified_order(openid="orU79wrXdrgNRNEZmoFD97rxGkb0", trade_type="JSAPI", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
+        print raw["prepay_id"]
     except WeixinPayError, e:
-    print e.message
+        print e.message
 
 查询订单
 
