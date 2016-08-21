@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -169,13 +169,13 @@ class WeixinPay(object):
         data.setdefault("spbill_create_ip", self.remote_addr)
         data.setdefault("sign", self.sign(data))
 
-        row = self.fetch(url, data)
-        if row["return_code"] == "FAIL":
-            raise WeixinPayError(row["return_msg"])
-        err_msg = row.get("err_code_des")
+        raw = self.fetch(url, data)
+        if raw["return_code"] == "FAIL":
+            raise WeixinPayError(raw["return_msg"])
+        err_msg = raw.get("err_code_des")
         if err_msg:
             raise WeixinPayError(err_msg)
-        return row
+        return raw
 
     def jsapi(self, **kwargs):
         raw = self.unified_order(**kwargs)
@@ -203,12 +203,12 @@ class WeixinPay(object):
         data.setdefault("nonce_str", self.nonce_str)
         data.setdefault("sign", self.sign(data))
 
-        row = self.fetch(url, data)
-        if row["return_code"] == "FAIL":
-            raise WeixinPayError(row["return_msg"])
-        return row
+        raw = self.fetch(url, data)
+        if raw["return_code"] == "FAIL":
+            raise WeixinPayError(raw["return_msg"])
+        return raw
 
-    def close_order(self, out_trade_no):
+    def close_order(self, out_trade_no, **data):
         """
         关闭订单
         transaction_id必填
@@ -216,17 +216,16 @@ class WeixinPay(object):
         """
         url = "https://api.mch.weixin.qq.com/pay/closeorder"
 
-        data = {}
         data.setdefault("out_trace_no", out_trade_no)
         data.setdefault("appid", self.app_id)
         data.setdefault("mch_id", self.mch_id)
         data.setdefault("nonce_str", self.nonce_str)
         data.setdefault("sign", self.sign(data))
 
-        row = self.fetch(url, data)
-        if row["return_code"] == "FAIL":
-            raise WeixinPayError(row["return_msg"])
-        return row
+        raw = self.fetch(url, data)
+        if raw["return_code"] == "FAIL":
+            raise WeixinPayError(raw["return_msg"])
+        return raw
 
     def refund(self, **data):
         """
@@ -252,10 +251,10 @@ class WeixinPay(object):
         data.setdefault("nonce_str", self.nonce_str)
         data.setdefault("sign", self.sign(data))
 
-        row = self.fetch(url, data)
-        if row["return_code"] == "FAIL":
-            raise WeixinPayError(row["return_msg"])
-        return row
+        raw = self.fetch(url, data)
+        if raw["return_code"] == "FAIL":
+            raise WeixinPayError(raw["return_msg"])
+        return raw
 
     def refund_query(self, **data):
         """
@@ -276,12 +275,12 @@ class WeixinPay(object):
         data.setdefault("nonce_str", self.nonce_str)
         data.setdefault("sign", self.sign(data))
 
-        row = self.fetch(url, data)
-        if row["return_code"] == "FAIL":
-            raise WeixinPayError(row["return_msg"])
-        return row
+        raw = self.fetch(url, data)
+        if raw["return_code"] == "FAIL":
+            raise WeixinPayError(raw["return_msg"])
+        return raw
 
-    def download_bill(self, **data):
+    def download_bill(self, bill_date, **data):
         """
         下载对账单
         bill_date为必填参数
@@ -291,12 +290,13 @@ class WeixinPay(object):
         if "bill_date" not in data:
             raise WeixinPayError("对账单接口中，缺少必填参数bill_date")
 
+        data.setdefault("bill_date", bill_date)
         data.setdefault("appid", self.app_id)
         data.setdefault("mch_id", self.mch_id)
         data.setdefault("nonce_str", self.nonce_str)
         data.setdefault("sign", self.sign(data))
 
-        row = self.fetch(url, data)
-        if row["return_code"] == "FAIL":
-            raise WeixinPayError(row["return_msg"])
-        return row
+        raw = self.fetch(url, data)
+        if raw["return_code"] == "FAIL":
+            raise WeixinPayError(raw["return_msg"])
+        return raw
