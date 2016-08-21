@@ -28,7 +28,7 @@ __version__ = "0.3.0"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
-StandaloneApplication = namedtuple('StandaloneApplication', ['config'])
+StandaloneApplication = namedtuple("StandaloneApplication", ["config"])
 
 
 class WeixinPayError(Exception):
@@ -118,12 +118,10 @@ class WeixinPay(object):
 
     def check(self, raw):
         """
-        验证返回数据是否能通过验证
+        验证签名是否正确
         """
         sign = raw.pop("sign")
-        if sign == self.sign(raw):
-            return True
-        return False
+        return sign == self.sign
 
     def to_xml(self, raw):
         s = ""
