@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -95,9 +95,7 @@ class WeixinPay(object):
 
     @property
     def remote_addr(self):
-        if request is not None:
-            return request.remote_addr
-        return ""
+        return request.remote_addr if request else ""
 
     @property
     def nonce_str(self):
@@ -107,7 +105,7 @@ class WeixinPay(object):
     to_utf8 = lambda self, x: x.encode("utf-8") if isinstance(x, unicode) else x
 
     def sign(self, raw):
-        raw = [(k, str(raw[k]) if isinstance(raw[k], int) else raw[k]) \
+        raw = [(k, str(raw[k]) if isinstance(raw[k], (int, float)) else raw[k]) \
                for k in sorted(raw.keys())]
         s = "&".join("=".join(kv) for kv in raw if kv[1])
         s += "&key={0}".format(self.mch_key)
@@ -177,7 +175,7 @@ class WeixinPay(object):
         err_msg = row.get("err_code_des")
         if err_msg:
             raise WeixinPayError(err_msg)
-        return row["prepay_id"]
+        return row
 
     def jsapi(self, **kwargs):
         prepay_id = self.unified_order(**kwargs)
@@ -220,6 +218,79 @@ class WeixinPay(object):
 
         data = {}
         data.setdefault("out_trace_no", out_trade_no)
+        data.setdefault("appid", self.app_id)
+        data.setdefault("mch_id", self.mch_id)
+        data.setdefault("nonce_str", self.nonce_str)
+        data.setdefault("sign", self.sign(data))
+
+        row = self.fetch(url, data)
+        if row["return_code"] == "FAIL":
+            raise WeixinPayError(row["return_msg"])
+        return row
+
+    def refund(self, **data):
+        """
+        申请退款
+        out_trade_no、transaction_id至少填一个且
+        out_refund_no、total_fee、refund_fee、op_user_id为必填参数
+        appid、mchid、nonce_str不需要填入
+        """
+        url = "https://api.mch.weixin.qq.com/secapi/pay/refund"
+        if "out_trade_no" not in data and "transaction_id" not in data:
+            raise WeixinPayError("订单查询接口中，out_trade_no、transaction_id至少填一个")
+        if "out_refund_no" not in data:
+            raise WeixinPayError("退款申请接口中，缺少必填参数out_refund_no");
+        if "total_fee" not in data:
+            raise WeixinPayError("退款申请接口中，缺少必填参数total_fee");
+        if "refund_fee" not in data:
+            raise WeixinPayError("退款申请接口中，缺少必填参数refund_fee");
+        if "op_user_id" not in data:
+            raise WeixinPayError("退款申请接口中，缺少必填参数op_user_id");
+
+        data.setdefault("appid", self.app_id)
+        data.setdefault("mch_id", self.mch_id)
+        data.setdefault("nonce_str", self.nonce_str)
+        data.setdefault("sign", self.sign(data))
+
+        row = self.fetch(url, data)
+        if row["return_code"] == "FAIL":
+            raise WeixinPayError(row["return_msg"])
+        return row
+
+    def refund_query(self, **data):
+        """
+        查询退款
+        提交退款申请后，通过调用该接口查询退款状态。退款有一定延时，
+        用零钱支付的退款20分钟内到账，银行卡支付的退款3个工作日后重新查询退款状态。
+
+        out_refund_no、out_trade_no、transaction_id、refund_id四个参数必填一个
+        appid、mchid、nonce_str不需要填入
+        """
+        url = "https://api.mch.weixin.qq.com/pay/refundquery"
+        if "out_refund_no" not in data and "out_trade_no" not in data \
+                and "transaction_id" not in data and "refund_id" not in data:
+            raise WeixinPayError("退款查询接口中，out_refund_no、out_trade_no、transaction_id、refund_id四个参数必填一个")
+
+        data.setdefault("appid", self.app_id)
+        data.setdefault("mch_id", self.mch_id)
+        data.setdefault("nonce_str", self.nonce_str)
+        data.setdefault("sign", self.sign(data))
+
+        row = self.fetch(url, data)
+        if row["return_code"] == "FAIL":
+            raise WeixinPayError(row["return_msg"])
+        return row
+
+    def download_bill(self, **data):
+        """
+        下载对账单
+        bill_date为必填参数
+        appid、mchid、nonce_str不需要填入
+        """
+        url = "https://api.mch.weixin.qq.com/pay/downloadbill"
+        if "bill_date" not in data:
+            raise WeixinPayError("对账单接口中，缺少必填参数bill_date")
+
         data.setdefault("appid", self.app_id)
         data.setdefault("mch_id", self.mch_id)
         data.setdefault("nonce_str", self.nonce_str)
