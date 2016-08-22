@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -192,6 +192,7 @@ class WeixinPay(object):
         生成给JavaScript调用的数据
         详细规则参考 https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=7_7&index=6
         """
+        kwargs.setdefault("trade_type", "JSAPI")
         raw = self.unified_order(**kwargs)
         package = "prepay_id={0}".format(raw["prepay_id"])
         timestamp = int(time.time())

@@ -3,7 +3,7 @@
 
 import json
 
-from flask import Flask
+from flask import Flask, request
 
 from flask.ext.weixin_pay import WeixinPay, WeixinPayError
 
@@ -30,8 +30,8 @@ def pay_create():
     微信JSAPI创建统一订单，并且生成参数给JS调用
     """
     try:
-        raw = wx_pay.jsapi(openid="openid", trade_type="JSAPI",
-                           body=u"测试", out_trade_no=out_trade_no, total_fee=1)
+        out_trade_no = wx_pay.nonce_str
+        raw = wx_pay.jsapi(openid="openid", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
         return json.loads(raw)
     except WeixinPayError, e:
         print e.message

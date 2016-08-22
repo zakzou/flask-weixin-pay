@@ -52,7 +52,8 @@
 
 生成JSAPI需要调用的参数
 
-    print wx_pay.jsapi(openid="orU79wrXdrgNRNEZmoFD97rxGkb0", trade_type="JSAPI", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
+    // total_fee 单位为分
+    print wx_pay.jsapi(openid="orU79wrXdrgNRNEZmoFD97rxGkb0", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
 
 ## 工具函数
 
