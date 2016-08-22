@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
@@ -121,7 +121,7 @@ class WeixinPay(object):
         验证签名是否正确
         """
         sign = raw.pop("sign")
-        return sign == self.sign
+        return sign == self.sign(raw)
 
     def to_xml(self, raw):
         s = ""
