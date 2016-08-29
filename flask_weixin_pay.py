@@ -24,7 +24,7 @@ except ImportError:
 
 
 __all__ = ("WeixinPay", "WeixinPayError")
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 __author__ = "Weicheng Zou <zwczou@gmail.com>"
 
 
