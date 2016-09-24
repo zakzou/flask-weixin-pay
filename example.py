@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-import json
-
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 from flask.ext.weixin_pay import WeixinPay, WeixinPayError
 
@@ -32,7 +29,7 @@ def pay_create():
     try:
         out_trade_no = wx_pay.nonce_str
         raw = wx_pay.jsapi(openid="openid", body=u"测试", out_trade_no=out_trade_no, total_fee=1)
-        return json.loads(raw)
+        return jsonify(raw)
     except WeixinPayError, e:
         print e.message
         return e.message, 400
