@@ -44,11 +44,11 @@
 
 查询订单
 
-    raw = wx_pay.close_order(out_trade_no)
+    raw = wx_pay.order_query(out_trade_no=out_trade_no)
 
 关闭订单
 
-    raw = wx_pay.order_query(out_trade_no=out_trade_no)
+    raw = wx_pay.close_order(out_trade_no)
 
 生成JSAPI需要调用的参数
 
