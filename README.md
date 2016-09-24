@@ -2,6 +2,8 @@
 
 参考文档 [https://pay.weixin.qq.com/wiki/doc/api/jsapi.php](https://pay.weixin.qq.com/wiki/doc/api/jsapi.php)
 
+如果需要更多功能(微信登陆，支付，消息等)可以点击 [weixin-python](https://github.com/zwczou/weixin-python/)
+
 ## 安装
 
 使用pip安装
